@@ -2,7 +2,7 @@ package cn.wenhaha.security.voter;
 
 import cn.wenhaha.security.Identity;
 import cn.wenhaha.security.repository.SecurityUserConfig;
-import org.apache.commons.lang3.StringUtils;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -65,7 +65,7 @@ public class RoleBasedVoter implements AccessDecisionVoter<Object> {
         HttpServletRequest request = fi.getRequest();
         String method = request.getMethod();
 
-        if (StringUtils.contains(method,"OPTIONS")){
+        if (method.contains("OPTIONS")){
             return ACCESS_GRANTED;
         }
 

@@ -10,6 +10,8 @@
 
     <name>demo</name>
     <description>Demo project for Spring Boot</description>
+
+
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
@@ -66,6 +68,12 @@
             <artifactId>jjwt-jackson</artifactId>
             <version>0.10.5</version>
             <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>cn.wenhaha</groupId>
+            <artifactId>wyndem-security</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 

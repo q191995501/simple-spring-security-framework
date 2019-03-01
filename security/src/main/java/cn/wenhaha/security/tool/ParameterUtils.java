@@ -1,7 +1,6 @@
 package cn.wenhaha.security.tool;
 
 import cn.wenhaha.security.controller.LoginController;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -10,7 +9,6 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * @Author: Wyndem
@@ -23,14 +21,10 @@ public class ParameterUtils {
 
 
     private final Class clazz;
-    private final Object object;
-
-    @Autowired
-    private SpringUtil springUtil;
 
 
     public ParameterUtils(String className) throws ClassNotFoundException {
-        this.object=springUtil.getBean(Class.forName(className));
+
         this.clazz= Class.forName(className);
     }
 
@@ -88,7 +82,7 @@ public class ParameterUtils {
         Object reset=null;
         for (Method m : findbyMethodName(methodName)) {
             try {
-                reset = m.invoke(object, parametes);
+                reset = m.invoke(clazz.newInstance(), parametes);
             } catch (Exception e) {
 
             }

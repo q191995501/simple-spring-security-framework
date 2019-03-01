@@ -1,7 +1,12 @@
-package cn.wenhaha.security;
+package cn.wenhaha.security.handler;
 
+import cn.wenhaha.security.tool.ResponseUtils;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.security.web.access.ExceptionTranslationFilter;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
@@ -9,10 +14,20 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.Serializable;
 
-@Component
+
+/**
+ * 401 处理 表示没有登陆访问需要登陆的资源
+ */
+
 public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint, Serializable {
 
     private static final long serialVersionUID = -8970718410437077606L;
+
+    @Autowired(required=true)
+    private AuthenticationFailHandler authenticationFailHandler;
+
+
+
 
      /**
       * @title: 显示
@@ -24,7 +39,7 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint, Se
     public void commence(HttpServletRequest request,
                          HttpServletResponse response,
                          AuthenticationException authException) throws IOException {
+        ResponseUtils.sendJsonMsg(response, HttpStatus.UNAUTHORIZED.value(),authenticationFailHandler.anonymous(authException));
 
-        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
     }
 }

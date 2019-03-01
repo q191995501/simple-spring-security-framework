@@ -1,12 +1,11 @@
 package cn.wenhaha.security.bean;
 
+import cn.wenhaha.security.Identity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -89,10 +88,20 @@ public class User  implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
 
-        return   getRoleMapping()
-                .get(getRole())
-                .stream()
-                .map(authority ->new SimpleGrantedAuthority(authority)).collect(Collectors.toList());
+        try {
+            return getRoleMapping()
+                     .get(getRole())
+                     .stream()
+                     .map(authority ->new SimpleGrantedAuthority(authority)).collect(Collectors.toList());
+        } catch (Exception e) {
+            //找不到该角色对应的权限
+            GrantedAuthority grantedAuthority = new SimpleGrantedAuthority(Identity.ROLE_ANONYMOUS.toString());
+            Collection<GrantedAuthority> collection=new ArrayList(1);
+            collection.add(grantedAuthority);
+            return collection;
+        }
+
+
     }
 
     public String getRole() {

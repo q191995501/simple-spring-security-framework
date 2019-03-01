@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
 import java.util.Objects;
 
 /**
@@ -46,8 +47,10 @@ public class DemoController {
             user.setName("wen");
             return user;
         }else{
-
-            return user;
+            HashMap<String, Object> stringObjectHashMap = new HashMap<>();
+            stringObjectHashMap.put("code",-1);
+            stringObjectHashMap.put("error","请检查用户或密码是否正确");
+            return stringObjectHashMap;
         }
 
     }

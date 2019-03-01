@@ -1,7 +1,5 @@
 package cn.wenhaha.security.repository;
 
-import cn.wenhaha.security.bean.User;
-
 import java.util.List;
 import java.util.Map;
 

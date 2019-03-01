@@ -1,8 +1,9 @@
 package cn.wenhaha.security.config;
 
-import cn.wenhaha.security.JwtAuthenticationEntryPoint;
+import cn.wenhaha.security.handler.JwtAuthenticationEntryPoint;
 import cn.wenhaha.security.LogoutSuccessHandlerWen;
 import cn.wenhaha.security.filter.JwtValidateSecurityFilter;
+import cn.wenhaha.security.handler.JwtAccessDeniedHandler;
 import cn.wenhaha.security.repository.SecurityUserConfig;
 import cn.wenhaha.security.service.SpringDataUserDetailsService;
 import cn.wenhaha.security.voter.RoleBasedVoter;
@@ -11,14 +12,19 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.access.AccessDecisionManager;
 import org.springframework.security.access.AccessDecisionVoter;
 import org.springframework.security.access.vote.ConsensusBased;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.util.Arrays;
@@ -43,8 +49,9 @@ public class SecurityConfig  extends WebSecurityConfigurerAdapter {
 
     @Autowired
     private SecurityUserConfig securityUserConfig;
-    @Autowired
-    private JwtAuthenticationEntryPoint unauthorizedHandler;
+
+
+
 
     public AccessDecisionManager accessDecisionManager() {
         List<AccessDecisionVoter<? extends Object>> decisionVoters
@@ -53,6 +60,9 @@ public class SecurityConfig  extends WebSecurityConfigurerAdapter {
 
         return new ConsensusBased(decisionVoters);
     }
+
+
+
 
     //加入自定义用户验证
     @Bean
@@ -66,6 +76,17 @@ public class SecurityConfig  extends WebSecurityConfigurerAdapter {
         return new BCryptPasswordEncoder();
     }
 
+
+    @Bean
+    public AuthenticationEntryPoint authenticationEntryPoint(){
+        return new JwtAuthenticationEntryPoint();
+    }
+
+    @Bean
+    public AccessDeniedHandler acessDeniedHandler(){
+        return new JwtAccessDeniedHandler();
+    }
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
@@ -75,14 +96,17 @@ public class SecurityConfig  extends WebSecurityConfigurerAdapter {
 //                .loginProcessingUrl(roule)
 //                .and()
                 //放行登录url
+                .csrf().disable()
                 .authorizeRequests()
                 .antMatchers(roule).permitAll()
+                .antMatchers(HttpMethod.OPTIONS).permitAll()
                 //其他界面需要认证
                 .anyRequest().authenticated()
                 .and()
                 .csrf().disable()
 
-                .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
+                .exceptionHandling().authenticationEntryPoint(authenticationEntryPoint()).and()
+                .exceptionHandling().accessDeniedHandler(acessDeniedHandler()).and()
 
                 //加入权限管理
                 .authorizeRequests()
@@ -100,4 +124,8 @@ public class SecurityConfig  extends WebSecurityConfigurerAdapter {
 
         logger.info("安全配置加载完毕!!!");
     }
+
+
+
+
 }

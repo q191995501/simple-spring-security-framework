@@ -1,4 +1,5 @@
 
+
 ### 介绍
 这是我自用的一个框架，暂且给它命名为:wyndem-security框架，小小的自恋一下，那么这个框架适用于**前后端分离**的项目。对于需要跳转页面的需求暂时没有。
 
@@ -51,7 +52,7 @@
 
 
 
-### 快速开始(三步完成)
+### 快速开始(四步完成)
 
 #### 第一步:实现`SecurityUserConfig`接口
 
@@ -151,7 +152,51 @@ User.java
 
 ---
 
-#### 第三步:填写配置：
+#### 第三步:自定义权限访问失败接口：
+如果用户尝试去访问一个需要权限不够或者尝试用错误的token进行认证，这时我们需要实现`AuthenticationFailHandler`接口，具体说明情况下面例子，已经做了很好的解释
+
+
+**Example:**
+MyAuthenticationFailHandler .java
+```
+
+@Component
+public class MyAuthenticationFailHandler implements AuthenticationFailHandler {
+
+
+    /**
+     * 当匪名用户企图用错误的token进行验证或尝试访问一个权限不够的资源
+     * @param authException  异常
+     * @return
+     */
+    @Override
+    public Object anonymous(AuthenticationException authException) {
+        Map<String,Object> map=new HashMap<>();
+        map.put("error",authException.getMessage());
+        map.put("msg","认证失败");
+        return map;
+    }
+
+
+    /**
+     * 当已认证用户尝试访问一个权限不够的资源
+     * @param e 异常
+     * @return
+     */
+    @Override
+    public Object forbidden(AccessDeniedException e) {
+        Map<String,Object> map=new HashMap<>();
+        map.put("error",e.getMessage());
+        map.put("msg","权限不足");
+        return map;
+    }
+}
+
+```
+
+
+
+#### 第四步:填写配置：
 
 ```
 #验证头
@@ -166,6 +211,8 @@ cn.wenhaha.longinHandle=com.example.demo.DemoController
 cn.wenhaha.userNameField=name
 #处理登录的方法
 cn.wenhaha.loginMethodName=login
+#是否使用继续记忆处理(记忆处理解释在下方有说明)
+cn.wenhaha.jwt.status=false
 ```
 
 有些同学可能会有疑问:
@@ -178,6 +225,11 @@ cn.wenhaha.loginMethodName=login
 2. 用户名字段是什么意思？
 	
 	就是保存用户名的字段名啦。上面配置中用户名字段为:name，那是因为我User对象中name字段是保存用户名的。如果你在登录方法中返回Map，那么保存用户名的key就是用户名字段
+3. 什么是记忆处理？
+	
+	记忆处理：当用户认证成功后，第一次访问需要加入认证后的`token`，后面再次访问任何资源都无需加`token`直到失效或用户更换了客户端为止。
+
+	无记忆处理：当用户认证成功后，不管是任何资源都需要带入`token`，否则为视为匪名用户
 
 **启动类：**
 

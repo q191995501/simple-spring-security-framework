@@ -2,6 +2,7 @@ package cn.wenhaha.security.voter;
 
 import cn.wenhaha.security.Identity;
 import cn.wenhaha.security.repository.SecurityUserConfig;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,6 +13,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.FilterInvocation;
 import org.springframework.util.AntPathMatcher;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -50,7 +52,6 @@ public class RoleBasedVoter implements AccessDecisionVoter<Object> {
     @Override
     public int vote(Authentication authentication, Object object, Collection<ConfigAttribute> attributes) {
 
-
         if(authentication == null) {
             return ACCESS_DENIED;
         }
@@ -60,8 +61,15 @@ public class RoleBasedVoter implements AccessDecisionVoter<Object> {
         FilterInvocation fi = (FilterInvocation) object;
         String url = fi.getRequestUrl();
         logger.info(authentication.getName());
+
+        HttpServletRequest request = fi.getRequest();
+        String method = request.getMethod();
+
+        if (StringUtils.contains(method,"OPTIONS")){
+            return ACCESS_GRANTED;
+        }
+
         for (GrantedAuthority attribute : authentication.getAuthorities()) {
-            logger.info(attribute.getAuthority());
             if(antPathMatcher.match(attribute.getAuthority(),url)){
                 return ACCESS_GRANTED;
             }else if (accessPublic(url)&&accessCertification(url)){
@@ -91,6 +99,7 @@ public class RoleBasedVoter implements AccessDecisionVoter<Object> {
 
         return  true;
     }
+
 
 
     private boolean accessCertification(String url){
